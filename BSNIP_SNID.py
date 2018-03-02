@@ -207,7 +207,7 @@ def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr):
     # if output_file does exist, proceed
     else:
         # read output file from run
-        type_results, template_results = read_output_file(fname)
+        type_results, template_results = read_output_file(output_file)
 
         # get the rlap of the best fit template with 'good' grading
         rlap_best = template_results[template_results['grade'] == 'good']['rlap'][0]
