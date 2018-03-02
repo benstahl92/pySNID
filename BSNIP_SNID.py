@@ -190,7 +190,7 @@ def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr):
 
     # formulate optional arguments to pass to SNID
     forcez_arg = z_arg(z)
-    ztol_arg = zfilter_arg(z_tol)
+    ztol_arg = 'zfilter={}'.format(z_tol)
     template_arg = 'usetype={}'.format(template_type)
 
     # combine arguments to formulate snid command and execute it
