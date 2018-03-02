@@ -42,9 +42,6 @@ def read_output_file(output_file):
                        columns - 'no.', 'sn', 'type', 'lap', 'rlap', 'z', 'zerr', 'age', 'age_flag', 'grade'
     '''
 
-    # extract the SNID output file name from the spectrum file
-    output_file = '{}_snid.output'.format(fname.split('.')[0])
-
     # column names for type results section of file
     tp_col_names = ['type', 'ntemp', 'fraction', 'slope', 'redshift', 'redshift_error', 'age', 'age_error']
     tp_res_start = 39 # lines to skip before reading type results
