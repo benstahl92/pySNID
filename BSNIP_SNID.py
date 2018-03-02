@@ -107,8 +107,8 @@ def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type):
 
     # if output_file does exist, proceed
     else:
-        # extract the SNID output file name from the spectrum file
-        output_file = '{}_snid.output'.format(fname.split('.')[0])
+        # read output file from run
+        type_results, template_results = read_output_file(output_file)
 
         # create copy of type_results that omits entry for template_type
         # then find the subtype as entry with the highest fraction
