@@ -144,7 +144,7 @@ def SNID_redshift(fname, path, template_type):
     template_arg = 'usetype={}'.format(template_type)
 
     # combine arguments to formulate snid command and execute it
-    snid_command = 'snid {} plot=0 inter=0 verbose=0 {}'.format(template_arg, spectrum)
+    snid_command = 'snid {} plot=0 inter=0 verbose=0 {}'.format(template_arg, path + fname)
     os.system(snid_command)
 
     # extract the SNID output file name from the spectrum file
