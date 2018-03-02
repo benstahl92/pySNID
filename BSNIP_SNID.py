@@ -257,7 +257,6 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
     Outputs
     -------
     running this function will lead to a '_snid.output' file being generated (for each spectrum) and left in the working dir
-
     '''
 
     # extract needed quantities from data_dict
@@ -271,37 +270,36 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
     # run SNID_type with higher rlap value
     SN_type = SNID_type(fname, path, z_host, rlaps[0], z_tol)
         
-        # if type isn't found, try again with lower rlap value
-        if SN_type is None:
-            SN_type = SNID_type(fname, path, z_host, rlaps[1], z_tol)
+    # if type isn't found, try again with lower rlap value
+    if SN_type is None:
+        SN_type = SNID_type(fname, path, z_host, rlaps[1], z_tol)
     
-        # if type found, try to find subtype (with higher rlap first)
-        if SN_type is not None:
-            SN_subtype = SNID_subtype(fname, path, z_host, rlaps[0], z_tol, SN_type)
+    # if type found, try to find subtype (with higher rlap first)
+    if SN_type is not None:
+        SN_subtype = SNID_subtype(fname, path, z_host, rlaps[0], z_tol, SN_type)
 
-            # if subtype isn't found, try again with lower rlap value
-            if SN_subtype is None:
-                SN_subtype = SNID_subtype(fname, path, z_host, rlaps[1], z_tol, SN_type)
+        # if subtype isn't found, try again with lower rlap value
+        if SN_subtype is None:
+            SN_subtype = SNID_subtype(fname, path, z_host, rlaps[1], z_tol, SN_type)
 
-            # if subtype found (then guaranteed that type is found), try to find redshift
-            if SN_subtype is not None:
-                z_snid, z_snid_error = SNID_redshift(spectrum, SN_subtype)
+        # if subtype found (then guaranteed that type is found), try to find redshift
+        if SN_subtype is not None:
+            z_snid, z_snid_error = SNID_redshift(spectrum, SN_subtype)
 
-                # if snid redshift and subtype found, try to find age
-                if z_snid is not None and z_snid_error is not None:
+            # if snid redshift and subtype found, try to find age
+            if z_snid is not None and z_snid_error is not None:
 
-                    # set redshift
-                    if type(z_host) int float or type(z_host) int int:
-                        z = z_host
-                    else:
-                        z = z_snid
+                # set redshift
+                if type(z_host) is float or type(z_host) is int:
+                    z = z_host
+                else:
+                    z = z_snid
 
-                    age, age_error = SNID_age(fname, path, z, z_tol, SN_subtype, relax_age_restr)
+                age, age_error = SNID_age(fname, path, z, z_tol, SN_subtype, relax_age_restr)
 
-            # if subtype not found try for redshifts
-            if SN_subtype is None:
-
-                z_snid, z_snid_error = SNID_redshift(fname, path, SN_type)
+        # if subtype not found try for redshifts
+        if SN_subtype is None:
+            z_snid, z_snid_error = SNID_redshift(fname, path, SN_type)
 
     # return calculated quantities
     return SN_type, SN_subtype, z_snid, z_snid_error, age, age_error
