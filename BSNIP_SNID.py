@@ -267,6 +267,9 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
     # construct full path to spectrum file
     path = base_dir + fpath + '/'
 
+    # instantiate variables for results
+    SN_type, SN_subtype, z_snid, z_snid_error, age, age_error = None, None, None, None, None, None
+
     # run SNID_type with higher rlap value
     SN_type = SNID_type(fname, path, z_host, rlaps[0], z_tol)
         
