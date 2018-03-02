@@ -284,7 +284,7 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
 
         # if subtype found (then guaranteed that type is found), try to find redshift
         if SN_subtype is not None:
-            z_snid, z_snid_error = SNID_redshift(spectrum, SN_subtype)
+            z_snid, z_snid_error = SNID_redshift(fname, path, SN_subtype)
 
             # if snid redshift and subtype found, try to find age
             if z_snid is not None and z_snid_error is not None:
