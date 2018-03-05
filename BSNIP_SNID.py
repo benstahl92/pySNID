@@ -17,7 +17,7 @@ from SNID_utils import z_arg, read_output_file
 
 # helper functions
 
-def SNID_type(fname, path, z_host, rlap, z_tol):
+def SNID_type(fname, path, z_host, rlap, z_tol, fl_ext):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN type
     SN type is determined if type of best matching ('good') template is same as type with
@@ -30,6 +30,7 @@ def SNID_type(fname, path, z_host, rlap, z_tol):
     z_host : redshift of the SN host - needs to float or int to be counted
     rlap : rlap value to run SNID with
     z_tol : allowable redshift tolerance (SNID default is 0.02) - not typically changed
+    fl_ext : file extension (i.e. .flm) of spectrum file
 
     Returns
     -------
@@ -46,7 +47,7 @@ def SNID_type(fname, path, z_host, rlap, z_tol):
     os.system(snid_command)
 
     # extract the SNID output file name from the spectrum file
-    output_file = '{}_snid.output'.format(fname.split('.')[0])
+    output_file = '{}_snid.output'.format(fname.split(fl_ext)[0])
 
     # if output_file does not exist return None
     if os.path.isfile(output_file) is False:
@@ -68,7 +69,7 @@ def SNID_type(fname, path, z_host, rlap, z_tol):
         # if favored type has fraction over 50 percent and is same as type of best fitting template return it - otherwise None
         return favored_type if fav_tp_frac >= 0.5 and favored_type == best_template_type else None
 
-def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type):
+def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type, fl_ext):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN subtype
     SN subtype is determined if subtype of best matching ('good') template is same as subtype with
@@ -82,6 +83,7 @@ def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type):
     rlap : rlap value to run SNID with
     z_tol : allowable redshift tolerance (SNID default is 0.02) - not typically changed
     template_type : SN type to force SNID to use with search
+    fl_ext : file extension (i.e. .flm) of spectrum file
 
     Returns
     -------
@@ -99,7 +101,7 @@ def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type):
     os.system(snid_command)
 
     # extract the SNID output file name from the spectrum file
-    output_file = '{}_snid.output'.format(fname.split('.')[0])
+    output_file = '{}_snid.output'.format(fname.split(fl_ext)[0])
 
     # if output_file does not exist return None
     if os.path.isfile(output_file) is False:
@@ -122,7 +124,7 @@ def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type):
         # if favored subtype has fraction over 50 percent and is same as subtype of best fitting template return it - otherwise None
         return favored_subtype if fav_stp_frac >= 0.5 and favored_subtype == best_template_type else None
 
-def SNID_redshift(fname, path, template_type):
+def SNID_redshift(fname, path, template_type, fl_ext):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN redshift and error
     SN redshift is median of redshifts from 'good' template matches
@@ -133,6 +135,7 @@ def SNID_redshift(fname, path, template_type):
     fname : filename of spectrum file to be analyzed
     path : full path to spectrum file
     template_type : SN type or subtype to force SNID to use with search
+    fl_ext : file extension (i.e. .flm) of spectrum file
 
     Returns
     -------
@@ -148,7 +151,7 @@ def SNID_redshift(fname, path, template_type):
     os.system(snid_command)
 
     # extract the SNID output file name from the spectrum file
-    output_file = '{}_snid.output'.format(fname.split('.')[0])
+    output_file = '{}_snid.output'.format(fname.split(fl_ext)[0])
 
     # if output_file does not exist return None, None
     if os.path.isfile(output_file) is False:
@@ -165,7 +168,7 @@ def SNID_redshift(fname, path, template_type):
         # return median and std deviation if there is at least one redshift found
         return (np.median(redshifts), np.std(redshifts)) if len(redshifts) > 0 else (None, None)
 
-def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr):
+def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr, fl_ext):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN age and error
     SN age is median of ages from 'good' template matches that have rlap at least 75 pct of maximum rlap
@@ -181,6 +184,7 @@ def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr):
     z_tol : allowable redshift tolerance (SNID default is 0.02) - not typically changed
     template_type : SN subtype to force SNID to use with search
     relax_age_restr : bool that selects whether to enforce age restrictions - should be False
+    fl_ext : file extension (i.e. .flm) of spectrum file
 
     Returns
     -------
@@ -198,7 +202,7 @@ def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr):
     os.system(snid_command)
 
     # extract the SNID output file name from the spectrum file
-    output_file = '{}_snid.output'.format(fname.split('.')[0])
+    output_file = '{}_snid.output'.format(fname.split(fl_ext)[0])
 
     # if output_file does not exist return None, None
     if os.path.isfile(output_file) is False:
@@ -228,7 +232,7 @@ def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr):
         else:
             return (age, age_err)
 
-def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = False):
+def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = False, fl_ext = '.flm'):
     '''
     runs the SuperNova IDentification code (SNID) [Blondin and Tonry 2007] with the updated 
     templates and prescription presented in BSNIP I [Silverman 2012] to find the type, subtype,
@@ -244,6 +248,8 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
     z_tol : allowable redshift tolerance (SNID default is 0.02) - not typically changed
     relax_age_restr : bool, optional
                       selects whether to enforce age restrictions - should be False
+    fl_ext : str, optional
+             file extension (i.e. .flm) of spectrum file
 
     Returns
     -------
