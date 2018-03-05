@@ -5,7 +5,7 @@ Primary Function: BSNID
 
     Runs the SuperNova IDentification code (SNID) [Blondin and Tonry 2007] with the updated 
     templates and prescription presented in BSNIP I [Silverman 2012] to find the type, subtype,
-    redshift and error, age and error of each spectrum in a directory
+    redshift and error, age and error of a SN from its spectrum
 '''
 
 # imports - standard
