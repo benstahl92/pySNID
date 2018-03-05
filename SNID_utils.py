@@ -7,6 +7,32 @@ A collection of utility functions for interacting with SNID inputs and outputs
 # imports
 import numpy as np
 
+def it_line_locate(fl, sstring):
+    '''
+    iteratively finds the line number in a file that contains the first occurrence of a given string
+
+    Parameters
+    ----------
+    fl : .txt-like file to search for the string in
+    sstring : string to search for in the file
+
+    Returns
+    -------
+    line_num : integer number of the line the the searched for string first occurs on, or None if string not found
+    '''
+
+    line_num = 0
+    found = False
+    with open(fl, 'r') as f:
+        for line in f:
+            if sstring in line:
+                found = True
+                break
+            else:
+                line_num += 1
+
+    return line_num if found else None
+
 def z_arg(z_host):
     '''
     takes SN host redshift and returns SNID formatted command to force redshift
@@ -45,7 +71,9 @@ def read_output_file(output_file):
     # column names for type results section of file
     tp_col_names = ['type', 'ntemp', 'fraction', 'slope', 'redshift', 'redshift_error', 'age', 'age_error']
     tp_res_start = 39 # lines to skip before reading type results
-    max_rows_type = 29 # number of rows to read for type results
+
+    # max rows is the stopping point minus the starting point minus one empty line
+    max_rows_type = it_line_locate(output_file, '### rlap-ordered template listings ###') - tp_res_start - 5
     
     # read in type results section, attempt to handle and report errors if tp_res_start is incorrect
     while True:
@@ -56,33 +84,21 @@ def read_output_file(output_file):
             break
 
         except ValueError:
-            print('Warning: line {} appears NOT to be the line where type results start'.format(tp_res_start))
+            print('\nWarning: line number error when reading output file. Attempting to rectify...')
             
-            # attempt to find correct type results starting point
-            tp_res_start = 1
-            with open(output_file, 'r') as f:
-                for line in f:
-                    if '#' + ' '.join(tp_col_names) in line:
-                        break
-                    else:
-                        tp_res_start += 1
+            # find the correct results starting point and recalculate number of rows to read
+            tp_res_start = it_line_locate(output_file, '#' + ' '.join(tp_col_names)) + 1
+            max_rows_type = it_line_locate(output_file, '### rlap-ordered template listings ###') - tp_res_start - 5
+
             print('Starting point identified as line {}'.format(tp_res_start))
+            print('Number of lines identified to be {}'.format(max_rows_type))
 
     # column names for rlap results section of file
     rlap_col_names = ['no.', 'sn', 'type', 'lap', 'rlap', 'z', 'zerr', 'age', 'age_flag', 'grade']
     rlap_res_start = tp_res_start + max_rows_type + 7 # lines to skip before reading rlap results
 
-    # iteratively find stopping point for rlap results reading
-    ctr = 0
-    with open(output_file, 'r') as f:
-        for line in f:
-            if '#-- rlap cutoff' in line:
-                break
-            else:
-                ctr += 1
-
     # max rows is the stopping point minus the starting point
-    max_rows_rlap = ctr - rlap_res_start
+    max_rows_rlap = it_line_locate(output_file, '#--- rlap cutoff') - rlap_res_start
 
     template_results = np.genfromtxt(output_file, dtype = None, skip_header = rlap_res_start,
                                      max_rows = max_rows_rlap, names = rlap_col_names, encoding = 'utf-8')
