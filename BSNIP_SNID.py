@@ -277,23 +277,23 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
     SN_type, SN_subtype, z_snid, z_snid_error, age, age_error = None, None, None, None, None, None
 
     # run SNID_type with higher rlap value
-    SN_type = SNID_type(fname, path, z_host, rlaps[0], z_tol)
+    SN_type = SNID_type(fname, path, z_host, rlaps[0], z_tol, fl_ext)
         
     # if type isn't found, try again with lower rlap value
     if SN_type is None:
-        SN_type = SNID_type(fname, path, z_host, rlaps[1], z_tol)
+        SN_type = SNID_type(fname, path, z_host, rlaps[1], z_tol, fl_ext)
     
     # if type found, try to find subtype (with higher rlap first)
     if SN_type is not None:
-        SN_subtype = SNID_subtype(fname, path, z_host, rlaps[0], z_tol, SN_type)
+        SN_subtype = SNID_subtype(fname, path, z_host, rlaps[0], z_tol, SN_type, fl_ext)
 
         # if subtype isn't found, try again with lower rlap value
         if SN_subtype is None:
-            SN_subtype = SNID_subtype(fname, path, z_host, rlaps[1], z_tol, SN_type)
+            SN_subtype = SNID_subtype(fname, path, z_host, rlaps[1], z_tol, SN_type, fl_ext)
 
         # if subtype found (then guaranteed that type is found), try to find redshift
         if SN_subtype is not None:
-            z_snid, z_snid_error = SNID_redshift(fname, path, SN_subtype)
+            z_snid, z_snid_error = SNID_redshift(fname, path, SN_subtype, fl_ext)
 
             # if snid redshift and subtype found, try to find age
             if z_snid is not None and z_snid_error is not None:
@@ -304,11 +304,11 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
                 else:
                     z = z_snid
 
-                age, age_error = SNID_age(fname, path, z, z_tol, SN_subtype, relax_age_restr)
+                age, age_error = SNID_age(fname, path, z, z_tol, SN_subtype, relax_age_restr, fl_ext)
 
         # if subtype not found try for redshifts
         if SN_subtype is None:
-            z_snid, z_snid_error = SNID_redshift(fname, path, SN_type)
+            z_snid, z_snid_error = SNID_redshift(fname, path, SN_type, fl_ext)
 
     # return calculated quantities
     return SN_type, SN_subtype, z_snid, z_snid_error, age, age_error
