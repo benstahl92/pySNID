@@ -34,7 +34,7 @@ def SNID_type(fname, path, z_host, rlap, z_tol, fl_ext):
 
     Returns
     -------
-    SN type if determined, None if type is not able to be determined
+    SN type, best matching template info, and number of good matches if determined, None if type is not able to be determined
     '''
 
     # formulate optional arguments to pass to SNID
@@ -58,16 +58,24 @@ def SNID_type(fname, path, z_host, rlap, z_tol, fl_ext):
         # read output file from run
         type_results, template_results = read_output_file(output_file)
 
-        # get favored type as type which has highest fraction from results
+        # get favored type as type which has highest fraction from results, also get number of 'good' matches
         # note: this should be robust against detecting subtypes b/c of way snid tabulates results
         favored_type = type_results['type'][type_results['fraction'] == np.max(type_results['fraction'])][0]
         fav_tp_frac = type_results['fraction'][type_results['fraction'] == np.max(type_results['fraction'])][0]
+        fav_tp_num = type_results['ntemp'][type_results['fraction'] == np.max(type_results['fraction'])][0]
 
-        # get type of best template (in terms of rlap) that is 'good' fit (last indexing strips off subtype information)
-        best_template_type = template_results[template_results['grade'] == 'good'][0]['type'][:2]
+        # retrieve information on the best template (in terms of rlap) that is 'good' fit
+        best_template = template_results[template_results['grade'] == 'good'][0]
 
-        # if favored type has fraction over 50 percent and is same as type of best fitting template return it - otherwise None
-        return favored_type if fav_tp_frac >= 0.5 and favored_type == best_template_type else None
+        # find the type of the best template
+        if best_template['type'] not in ['NotSN','AGN','Gal','LBV','M-star','C-Star','QSO']:
+            # if not one of the above, then type is two letters long
+            best_template_type = best_template['type'][:2]
+        else:
+            best_template_type = best_template['type']
+
+        # if favored type has fraction over 50 percent and is same as type of best fitting template return it (and info) - otherwise None
+        return (favored_type, best_template, fav_tp_num) if fav_tp_frac >= 0.5 and favored_type == best_template_type else (None, None, None)
 
 def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type, fl_ext):
     '''
@@ -274,14 +282,14 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
     path = base_dir + fpath + '/'
 
     # instantiate variables for results
-    SN_type, SN_subtype, z_snid, z_snid_error, age, age_error = None, None, None, None, None, None
+    SN_type, best_templ, good_num, SN_subtype, z_snid, z_snid_error, age, age_error = None, None, None, None, None, None, None, None
 
     # run SNID_type with higher rlap value
-    SN_type = SNID_type(fname, path, z_host, rlaps[0], z_tol, fl_ext)
+    SN_type, best_templ, good_num = SNID_type(fname, path, z_host, rlaps[0], z_tol, fl_ext)
         
     # if type isn't found, try again with lower rlap value
     if SN_type is None:
-        SN_type = SNID_type(fname, path, z_host, rlaps[1], z_tol, fl_ext)
+        SN_type, best_templ, good_num = SNID_type(fname, path, z_host, rlaps[1], z_tol, fl_ext)
     
     # if type found, try to find subtype (with higher rlap first)
     if SN_type is not None:
@@ -311,4 +319,4 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
             z_snid, z_snid_error = SNID_redshift(fname, path, SN_type, fl_ext)
 
     # return calculated quantities
-    return SN_type, SN_subtype, z_snid, z_snid_error, age, age_error
+    return SN_type, best_templ, good_num, SN_subtype, z_snid, z_snid_error, age, age_error
