@@ -51,7 +51,7 @@ def SNID_type(fname, path, z_host, rlap, z_tol, fl_ext):
 
     # if output_file does not exist return None
     if os.path.isfile(output_file) is False:
-        return None
+        return None, None, None
 
     # if output_file does exist, proceed
     else:
