@@ -17,7 +17,7 @@ from SNID_utils import z_arg, read_output_file
 
 # helper functions
 
-def SNID_type(fname, path, z_host, rlap, z_tol, fl_ext):
+def SNID_type(fname, z_host, rlap = 5, z_tol = 0.02):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN type
     SN type is determined if type of best matching ('good') template is same as type with
@@ -26,11 +26,11 @@ def SNID_type(fname, path, z_host, rlap, z_tol, fl_ext):
     Parameters
     ----------
     fname : filename of spectrum file to be analyzed
-    path : full path to spectrum file
+    #path : full path to spectrum file
     z_host : redshift of the SN host - needs to float or int to be counted
     rlap : rlap value to run SNID with
     z_tol : allowable redshift tolerance (SNID default is 0.02) - not typically changed
-    fl_ext : file extension (i.e. .flm) of spectrum file
+    #fl_ext : file extension (i.e. .flm) of spectrum file
 
     Returns
     -------
@@ -43,11 +43,12 @@ def SNID_type(fname, path, z_host, rlap, z_tol, fl_ext):
     rlap_arg = 'rlapmin={}'.format(rlap)
 
     # combine arguments to formulate snid command and execute it
-    snid_command = 'snid {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, ztol_arg, path + fname)
+    #snid_command = 'snid {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, ztol_arg, path + fname)
+    snid_command = 'snid {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, ztol_arg, fname)
     os.system(snid_command)
 
-    # extract the SNID output file name from the spectrum file
-    output_file = '{}_snid.output'.format(fname.split(fl_ext)[0])
+    # extract the SNID output file name from the spectrum file (by splitting on the '.' between the base and extension)
+    output_file = '{}_snid.output'.format(fname.split('.')[0])
 
     # if output_file does not exist return None
     if os.path.isfile(output_file) is False:
@@ -75,9 +76,9 @@ def SNID_type(fname, path, z_host, rlap, z_tol, fl_ext):
             best_template_type = best_template['type']
 
         # if favored type has fraction over 50 percent and is same as type of best fitting template return it (and info) - otherwise None
-        return (favored_type, best_template, fav_tp_num) if fav_tp_frac >= 0.5 and favored_type == best_template_type else (None, None, None)
+        return (favored_type, best_template, fav_tp_num) if ((fav_tp_frac >= 0.5) and (favored_type == best_template_type)) else (None, None, None)
 
-def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type, fl_ext):
+def SNID_subtype(fname, z_host, template_type = 'all', rlap = 5, z_tol = 0.02):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN subtype
     SN subtype is determined if subtype of best matching ('good') template is same as subtype with
@@ -102,14 +103,17 @@ def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type, fl_ext):
     forcez_arg = z_arg(z_host)
     ztol_arg = 'zfilter={}'.format(z_tol)
     rlap_arg = 'rlapmin={}'.format(rlap)
-    template_arg = 'usetype={}'.format(template_type)
+    if template_type == 'all':
+        template_arg = ''
+    else:
+        template_arg = 'usetype={}'.format(template_type)
 
     # combine arguments to formulate snid command and execute it
-    snid_command = 'snid {} {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, ztol_arg, template_arg, path + fname)
+    snid_command = 'snid {} {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, ztol_arg, template_arg, fname)
     os.system(snid_command)
 
-    # extract the SNID output file name from the spectrum file
-    output_file = '{}_snid.output'.format(fname.split(fl_ext)[0])
+    # extract the SNID output file name from the spectrum file (by splitting on the '.' between the base and extension)
+    output_file = '{}_snid.output'.format(fname.split('.')[0])
 
     # if output_file does not exist return None
     if os.path.isfile(output_file) is False:
@@ -130,9 +134,9 @@ def SNID_subtype(fname, path, z_host, rlap, z_tol, template_type, fl_ext):
         best_template_type = template_results[template_results['grade'] == 'good'][0]['type']
 
         # if favored subtype has fraction over 50 percent and is same as subtype of best fitting template return it - otherwise None
-        return favored_subtype if fav_stp_frac >= 0.5 and favored_subtype == best_template_type else None
+        return favored_subtype if ((fav_stp_frac >= 0.5) and (favored_subtype == best_template_type)) else None
 
-def SNID_redshift(fname, path, template_type, fl_ext):
+def SNID_redshift(fname, template_type = 'all'):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN redshift and error
     SN redshift is median of redshifts from 'good' template matches
@@ -152,14 +156,17 @@ def SNID_redshift(fname, path, template_type, fl_ext):
     '''
 
     # formulate optional arguments to pass to SNID
-    template_arg = 'usetype={}'.format(template_type)
+    if template_type == 'all':
+        template_arg = ''
+    else:
+        template_arg = 'usetype={}'.format(template_type)
 
     # combine arguments to formulate snid command and execute it
     snid_command = 'snid {} plot=0 inter=0 verbose=0 {}'.format(template_arg, path + fname)
     os.system(snid_command)
 
-    # extract the SNID output file name from the spectrum file
-    output_file = '{}_snid.output'.format(fname.split(fl_ext)[0])
+    # extract the SNID output file name from the spectrum file (by splitting on the '.' between the base and extension)
+    output_file = '{}_snid.output'.format(fname.split('.')[0])
 
     # if output_file does not exist return None, None
     if os.path.isfile(output_file) is False:
@@ -174,9 +181,9 @@ def SNID_redshift(fname, path, template_type, fl_ext):
         redshifts = template_results[template_results['grade']=='good']['z']
 
         # return median and std deviation if there is at least one redshift found
-        return (np.median(redshifts), np.std(redshifts)) if len(redshifts) > 0 else (None, None)
+        return (np.median(redshifts), np.std(redshifts)) if (len(redshifts) > 0) else (None, None)
 
-def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr, fl_ext):
+def SNID_age(fname, z, z_tol = 0.02, template_type = 'all', relax_age_restr = False):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN age and error
     SN age is median of ages from 'good' template matches that have rlap at least 75 pct of maximum rlap
@@ -203,14 +210,17 @@ def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr, fl_ext):
     # formulate optional arguments to pass to SNID
     forcez_arg = z_arg(z)
     ztol_arg = 'zfilter={}'.format(z_tol)
-    template_arg = 'usetype={}'.format(template_type)
+    if template_type == 'all':
+        template_arg = ''
+    else:
+        template_arg = 'usetype={}'.format(template_type)
 
     # combine arguments to formulate snid command and execute it
     snid_command = 'snid {} {} {} plot=0 inter=0 verbose=0 {}'.format(forcez_arg, ztol_arg, template_arg, path + fname)
     os.system(snid_command)
 
-    # extract the SNID output file name from the spectrum file
-    output_file = '{}_snid.output'.format(fname.split(fl_ext)[0])
+    # extract the SNID output file name from the spectrum file (by splitting on the '.' between the base and extension)
+    output_file = '{}_snid.output'.format(fname.split('.')[0])
 
     # if output_file does not exist return None, None
     if os.path.isfile(output_file) is False:
@@ -234,30 +244,31 @@ def SNID_age(fname, path, z, z_tol, template_type, relax_age_restr, fl_ext):
         # if age restrictions are not relaxed, return age and age error if age error satisfies below reqs, otherwise return None
         if relax_age_restr is False:
             # return age and error if the error is less than 4d or 20 percent of age (whichever greater)
-            return (age, age_err) if age_err < 4 or age_err < 0.2 * age else (None, None)
+            return (age, age_err) if ((age_err < 4) or (age_err < 0.2 * age)) else (None, None)
 
         # if age restrictions are relaxed, then return age and age error regardless
         else:
             return (age, age_err)
 
-def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = False, fl_ext = '.flm'):
+def pySNID(fname, z_host, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False):
     '''
     runs the SuperNova IDentification code (SNID) [Blondin and Tonry 2007] with the updated 
-    templates and prescription presented in BSNIP I [Silverman 2012] to find the type, subtype,
-    redshift and error, age and error of a SN from its spectrum
+    templates and prescription presented in BSNIP I [Silverman 2012] and used by Stahl et al. 2019
+    to find the type, subtype, redshift and error, age and error of a SN from its spectrum
 
     Parameters
     ----------
-    data_dict : dictionary containing data relevant to the spectrum to analyze
-                must have values for keys: 'Filename', 'Filepath', 'Redshift_Gal'
-    base_dir : base directory path that all other files and paths are specified relative to
+    #data_dict : dictionary containing data relevant to the spectrum to analyze
+    #            must have values for keys: 'Filename', 'Filepath', 'Redshift_Gal'
+    fname : filename of spectrum file to be analyzed (including path)
+    #base_dir : base directory path that all other files and paths are specified relative to
     rlaps : tuple, optional
             tuple containing the SNID rlap values to use, in order of preference
     z_tol : allowable redshift tolerance (SNID default is 0.02) - not typically changed
     relax_age_restr : bool, optional
                       selects whether to enforce age restrictions - should be False
-    fl_ext : str, optional
-             file extension (i.e. .flm) of spectrum file
+    #fl_ext : str, optional
+    #         file extension (i.e. .flm) of spectrum file
 
     Returns
     -------
@@ -274,45 +285,51 @@ def BSNID(data_dict, base_dir, rlaps = (10,5), z_tol = 0.02, relax_age_restr = F
     '''
 
     # extract needed quantities from data_dict
-    fname = data_dict['Filename']
-    fpath = data_dict['Filepath']
-    z_host = data_dict['Redshift_Gal']
+    #fname = data_dict['Filename']
+    #fpath = data_dict['Filepath']
+    #z_host = data_dict['Redshift_Gal']
 
     # construct full path to spectrum file
-    path = base_dir + fpath + '/'
+    #path = base_dir + fpath + '/'
 
-    # instantiate variables for results
-    SN_type, best_templ, good_num, SN_subtype, z_snid, z_snid_error, age, age_error = None, None, None, None, None, None, None, None
+    # instantiate variables for results (want default to be None)
+    #SN_type, best_templ, good_num, SN_subtype, z_snid, z_snid_error, age, age_error = None, None, None, None, None, None, None, None
 
     # run SNID_type with higher rlap value
-    SN_type, best_templ, good_num = SNID_type(fname, path, z_host, rlaps[0], z_tol, fl_ext)
+    #SN_type, best_templ, good_num = SNID_type(fname, path, z_host, rlaps[0], z_tol, fl_ext)
+    SN_type, best_templ, good_num = SNID_type(fname, z_host, rlaps = rlaps[0], z_tol = z_tol)
         
     # if type isn't found, try again with lower rlap value
     if SN_type is None:
-        SN_type, best_templ, good_num = SNID_type(fname, path, z_host, rlaps[1], z_tol, fl_ext)
+        #SN_type, best_templ, good_num = SNID_type(fname, path, z_host, rlaps[1], z_tol, fl_ext)
+        SN_type, best_templ, good_num = SNID_type(fname, z_host, rlaps = rlaps[1], z_tol = z_tol)
     
     # if type found, try to find subtype (with higher rlap first)
     if SN_type is not None:
-        SN_subtype = SNID_subtype(fname, path, z_host, rlaps[0], z_tol, SN_type, fl_ext)
+        #SN_subtype = SNID_subtype(fname, path, z_host, rlaps[0], z_tol, SN_type, fl_ext)
+        SN_subtype = SNID_subtype(fname, z_host, SN_type = SN_type, rlap = rlaps[0], z_tol = z_tol)
 
         # if subtype isn't found, try again with lower rlap value
         if SN_subtype is None:
-            SN_subtype = SNID_subtype(fname, path, z_host, rlaps[1], z_tol, SN_type, fl_ext)
+            #SN_subtype = SNID_subtype(fname, path, z_host, rlaps[1], z_tol, SN_type, fl_ext)
+            SN_subtype = SNID_subtype(fname, z_host, SN_type = SN_type, rlap = rlaps[1], z_tol = z_tol)
 
         # if subtype found (then guaranteed that type is found), try to find redshift
         if SN_subtype is not None:
-            z_snid, z_snid_error = SNID_redshift(fname, path, SN_subtype, fl_ext)
+            #z_snid, z_snid_error = SNID_redshift(fname, path, SN_subtype, fl_ext)
+            z_snid, z_snid_error = SNID_redshift(fname, SN_subtype = SN_subtype)
 
             # if snid redshift and subtype found, try to find age
-            if z_snid is not None and z_snid_error is not None:
+            if( z_snid is not None) and (z_snid_error is not None):
 
                 # set redshift
-                if type(z_host) is float or type(z_host) is int:
+                if (type(z_host) == type(0.1)) or (type(z_host) == type(1)):
                     z = z_host
                 else:
                     z = z_snid
 
-                age, age_error = SNID_age(fname, path, z, z_tol, SN_subtype, relax_age_restr, fl_ext)
+                #age, age_error = SNID_age(fname, path, z, z_tol, SN_subtype, relax_age_restr, fl_ext)
+                age, age_error = SNID_age(fname, z, z_tol = z_tol, SN_subtype = SN_subtype, relax_age_restr = relax_age_restr)
 
         # if subtype not found try for redshifts
         if SN_subtype is None:
