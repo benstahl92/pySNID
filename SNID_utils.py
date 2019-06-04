@@ -2,23 +2,28 @@
 SNID_utils.py
 
 A collection of utility functions for interacting with SNID inputs and outputs
+the casual user will have no need to directly interact with the contents of this file
 '''
 
 # imports
 import numpy as np
 
-def it_line_locate(fl, sstring):
+def _it_line_locate(fl, sstring):
     '''
-    iteratively finds the line number in a file that contains the first occurrence of a given string
+    iteratively find line number in file that containing first occurrence of given string
 
     Parameters
     ----------
-    fl : .txt-like file to search for the string in
-    sstring : string to search for in the file
+    fl : .txt-like file to search for string in
+    sstring : string to search for file
 
     Returns
     -------
     line_num : integer number of the line the the searched for string first occurs on, or None if string not found
+
+    Notes
+    -------
+    could be done in less lines and probably much faster with pandas
     '''
 
     line_num = 0
@@ -35,30 +40,30 @@ def it_line_locate(fl, sstring):
 
 def z_arg(z_host):
     '''
-    takes SN host redshift and returns SNID formatted command to force redshift
+    takes SN host redshift and returns SNID formatted string to force redshift
     returns empty string if no use-able (float or int) redshift is passed
 
     Parameters
     ----------
-    z_host : redshift of the SN host - needs to float or int to be counted
+    z_host : redshift of the SN host - needs to be float or int to be counted
 
     Returns
     -------
     SNID formatted command to force the redshift unless no use-able redshift passed (then empty string)
     '''
 
-    if type(z_host) is float or type(z_host) is int:
+    if (type(z_host) == type(0.1)) or (type(z_host) == (1)):
         return 'forcez={}'.format(z_host)
     else:
         return ''
 
 def read_output_file(output_file):
     '''
-    parses a snid output ('_snid.output') file and returns type results and template rlap results above the rlap cutoff
+    parses a SNID output ('_snid.output') file and returns type results and template rlap results above the rlap cutoff
 
     Parameters
     ----------
-    output_file : snid output file containing results to read (file ending with '_snid.output')
+    output_file : SNID output file containing results to read (file ending with '_snid.output')
 
     Returns
     -------
@@ -73,7 +78,7 @@ def read_output_file(output_file):
     tp_res_start = 39 # lines to skip before reading type results
 
     # max rows is the stopping point minus the starting point minus one empty line
-    max_rows_type = it_line_locate(output_file, '### rlap-ordered template listings ###') - tp_res_start - 5
+    max_rows_type = _it_line_locate(output_file, '### rlap-ordered template listings ###') - tp_res_start - 5
     
     # read in type results section, attempt to handle and report errors if tp_res_start is incorrect
     while True:
@@ -87,8 +92,8 @@ def read_output_file(output_file):
             print('\nWarning: line number error when reading output file. Attempting to rectify...')
             
             # find the correct results starting point and recalculate number of rows to read
-            tp_res_start = it_line_locate(output_file, '#' + ' '.join(tp_col_names)) + 1
-            max_rows_type = it_line_locate(output_file, '### rlap-ordered template listings ###') - tp_res_start - 5
+            tp_res_start = _it_line_locate(output_file, '#' + ' '.join(tp_col_names)) + 1
+            max_rows_type = _it_line_locate(output_file, '### rlap-ordered template listings ###') - tp_res_start - 5
 
             print('Starting point identified as line {}'.format(tp_res_start))
             print('Number of lines identified to be {}'.format(max_rows_type))
@@ -98,7 +103,7 @@ def read_output_file(output_file):
     rlap_res_start = tp_res_start + max_rows_type + 7 # lines to skip before reading rlap results
 
     # max rows is the stopping point minus the starting point
-    max_rows_rlap = it_line_locate(output_file, '#--- rlap cutoff') - rlap_res_start
+    max_rows_rlap = _it_line_locate(output_file, '#--- rlap cutoff') - rlap_res_start
 
     template_results = np.genfromtxt(output_file, dtype = None, skip_header = rlap_res_start,
                                      max_rows = max_rows_rlap, names = rlap_col_names, encoding = 'utf-8')
