@@ -15,9 +15,7 @@ import numpy as np
 # imports - custom
 from SNID_utils import z_arg, read_output_file
 
-# helper functions
-
-def SNID_type(fname, z_host, rlap = 5, z_tol = 0.02):
+def SNID_type(fname, z_host = None, rlap = 5, z_tol = 0.02):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN type
     SN type is determined if type of best matching ('good') template is same as type with
@@ -26,11 +24,9 @@ def SNID_type(fname, z_host, rlap = 5, z_tol = 0.02):
     Parameters
     ----------
     fname : filename of spectrum file to be analyzed
-    #path : full path to spectrum file
     z_host : redshift of the SN host - needs to float or int to be counted
     rlap : rlap value to run SNID with
     z_tol : allowable redshift tolerance (SNID default is 0.02) - not typically changed
-    #fl_ext : file extension (i.e. .flm) of spectrum file
 
     Returns
     -------
@@ -162,7 +158,7 @@ def SNID_redshift(fname, template_type = 'all'):
         template_arg = 'usetype={}'.format(template_type)
 
     # combine arguments to formulate snid command and execute it
-    snid_command = 'snid {} plot=0 inter=0 verbose=0 {}'.format(template_arg, path + fname)
+    snid_command = 'snid {} plot=0 inter=0 verbose=0 {}'.format(template_arg, fname)
     os.system(snid_command)
 
     # extract the SNID output file name from the spectrum file (by splitting on the '.' between the base and extension)
@@ -216,7 +212,7 @@ def SNID_age(fname, z, z_tol = 0.02, template_type = 'all', relax_age_restr = Fa
         template_arg = 'usetype={}'.format(template_type)
 
     # combine arguments to formulate snid command and execute it
-    snid_command = 'snid {} {} {} plot=0 inter=0 verbose=0 {}'.format(forcez_arg, ztol_arg, template_arg, path + fname)
+    snid_command = 'snid {} {} {} plot=0 inter=0 verbose=0 {}'.format(forcez_arg, ztol_arg, template_arg, fname)
     os.system(snid_command)
 
     # extract the SNID output file name from the spectrum file (by splitting on the '.' between the base and extension)
@@ -293,31 +289,31 @@ def pySNID(fname, z_host, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False
     #path = base_dir + fpath + '/'
 
     # instantiate variables for results (want default to be None)
-    #SN_type, best_templ, good_num, SN_subtype, z_snid, z_snid_error, age, age_error = None, None, None, None, None, None, None, None
+    SN_type, best_templ, good_num, SN_subtype, z_snid, z_snid_error, age, age_error = None, None, None, None, None, None, None, None
 
     # run SNID_type with higher rlap value
     #SN_type, best_templ, good_num = SNID_type(fname, path, z_host, rlaps[0], z_tol, fl_ext)
-    SN_type, best_templ, good_num = SNID_type(fname, z_host, rlaps = rlaps[0], z_tol = z_tol)
+    SN_type, best_templ, good_num = SNID_type(fname, z_host, rlap = rlaps[0], z_tol = z_tol)
         
     # if type isn't found, try again with lower rlap value
     if SN_type is None:
         #SN_type, best_templ, good_num = SNID_type(fname, path, z_host, rlaps[1], z_tol, fl_ext)
-        SN_type, best_templ, good_num = SNID_type(fname, z_host, rlaps = rlaps[1], z_tol = z_tol)
+        SN_type, best_templ, good_num = SNID_type(fname, z_host, rlap = rlaps[1], z_tol = z_tol)
     
     # if type found, try to find subtype (with higher rlap first)
     if SN_type is not None:
         #SN_subtype = SNID_subtype(fname, path, z_host, rlaps[0], z_tol, SN_type, fl_ext)
-        SN_subtype = SNID_subtype(fname, z_host, SN_type = SN_type, rlap = rlaps[0], z_tol = z_tol)
+        SN_subtype = SNID_subtype(fname, z_host, template_type = SN_type, rlap = rlaps[0], z_tol = z_tol)
 
         # if subtype isn't found, try again with lower rlap value
         if SN_subtype is None:
             #SN_subtype = SNID_subtype(fname, path, z_host, rlaps[1], z_tol, SN_type, fl_ext)
-            SN_subtype = SNID_subtype(fname, z_host, SN_type = SN_type, rlap = rlaps[1], z_tol = z_tol)
+            SN_subtype = SNID_subtype(fname, z_host, template_type = SN_type, rlap = rlaps[1], z_tol = z_tol)
 
         # if subtype found (then guaranteed that type is found), try to find redshift
         if SN_subtype is not None:
             #z_snid, z_snid_error = SNID_redshift(fname, path, SN_subtype, fl_ext)
-            z_snid, z_snid_error = SNID_redshift(fname, SN_subtype = SN_subtype)
+            z_snid, z_snid_error = SNID_redshift(fname, template_type = SN_subtype)
 
             # if snid redshift and subtype found, try to find age
             if( z_snid is not None) and (z_snid_error is not None):
@@ -329,7 +325,7 @@ def pySNID(fname, z_host, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False
                     z = z_snid
 
                 #age, age_error = SNID_age(fname, path, z, z_tol, SN_subtype, relax_age_restr, fl_ext)
-                age, age_error = SNID_age(fname, z, z_tol = z_tol, SN_subtype = SN_subtype, relax_age_restr = relax_age_restr)
+                age, age_error = SNID_age(fname, z, z_tol = z_tol, template_type = SN_subtype, relax_age_restr = relax_age_restr)
 
         # if subtype not found try for redshifts
         if SN_subtype is None:
