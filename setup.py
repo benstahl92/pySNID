@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='pySNDB',
+setup(name='pySNID',
       version='0.1.dev0',
       description='python code for running the SuperNova IDentifcation code (SNID) [Blondin and Tonry 2007]',
       url='https://github.com/benstahl92/pySNID',
