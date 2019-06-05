@@ -63,7 +63,7 @@ def _z_arg(z):
     SNID formatted argument to force the redshift unless no use-able redshift passed (then empty string)
     '''
 
-    if (type(z) == type(0.1)) or (type(z) == (1)):
+    if ((type(z) == type(0.1)) or (type(z) == (1))) and (not np.isnan(z)):
         return 'forcez={}'.format(z)
     else:
         return ''
