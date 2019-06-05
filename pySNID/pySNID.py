@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 # imports - custom
-from SNID_utils import exec_SNID, read_output_file
+from .pySNIDutils import exec_SNID, read_output_file
 
 def SNID_type(fname, z = None, rlap = 10, z_tol = 0.02):
     '''
