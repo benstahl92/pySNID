@@ -21,7 +21,7 @@ setup(name='pySNID',
       license='MIT',
       packages=['pySNID'],
       install_requires=['numpy'],
-      cmd_class = {
+      cmdclass = {
           'install' : CustomInstallCommand,
       },
     )
