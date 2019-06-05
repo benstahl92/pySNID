@@ -20,8 +20,8 @@ setup(name='pySNID',
       author_email='benjamin_stahl@berkeley.edu',
       license='MIT',
       packages=['pySNID'],
-      install_requires=['numpy']
+      install_requires=['numpy'],
       cmd_class = {
           'install' : CustomInstallCommand,
-      }
+      },
     )
