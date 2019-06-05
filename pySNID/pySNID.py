@@ -3,7 +3,10 @@ import os
 import numpy as np
 
 # imports - custom
-from .pySNIDutils import exec_SNID, read_output_file
+from .pySNIDutils import exec_SNID, read_output_file, _snid_check
+
+# check that SNID is properly installed and exit if not
+_snid_check()
 
 def SNID_type(fname, z = None, rlap = 10, z_tol = 0.02):
     '''
@@ -115,7 +118,7 @@ def SNID_redshift(fname, template_type = 'all'):
     '''
 
     # execute SNID and retrieve output
-    output_file = exec_SNID(fname, template = typlate_type)
+    output_file = exec_SNID(fname, template = template_type)
 
     # if output_file does not exist return None
     if output_file is None:

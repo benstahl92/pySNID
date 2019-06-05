@@ -7,7 +7,17 @@ the casual user will have no need to directly interact with the contents of this
 
 # imports
 import os
+import shlex
+import subprocess
 import numpy as np
+
+def _snid_check():
+    '''checks that SNID is properly installed and raises an import error if not'''
+
+    import shutil
+    s = shutil.which('snid')
+    if (s is None) or (s == ''):
+        raise ImportError("SNID is not installed as expected --- make sure 'snid' invokes it")
 
 def _it_line_locate(fl, sstring):
     '''
@@ -109,13 +119,18 @@ def exec_SNID(fname, z = None, template = 'all', rlap = 10, z_tol = 0.02, print_
     # construct command
     snid_command = 'snid {} {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, ztol_arg, template_arg, fname)
 
+    # get output file name (made in working directory) and delete file from previous runs
+    output_file = '{}_snid.output'.format(os.path.basename(fname).split('.')[0])
+    if os.path.isfile(output_file):
+        os.remove(output_file)
+
     # execute command
     if print_cmd:
         print(snid_command)
-    os.system(snid_command)
+    p = subprocess.Popen(shlex.split(snid_command), stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    stdout, stderr = p.communicate() # for now, don't do anything with output
 
-    # get name of output file and return if it exists
-    output_file = '{}_snid.output'.format(fname.split('.')[0])
+    # return output file name if SNID run is successful
     if os.path.isfile(output_file):
         return output_file
     else:
