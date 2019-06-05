@@ -139,7 +139,8 @@ def exec_SNID(fname, z = None, template = 'all', rlap = 'default', z_tol = 0.02,
     snid_command = 'snid {} {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, ztol_arg, template_arg, fname)
 
     # get output file name (made in working directory) and delete file from previous runs
-    output_file = '{}_snid.output'.format(os.path.basename(fname).split('.')[0])
+    fl_ext = '.' +  os.path.basename(fname).split('.')[-1]
+    output_file = '{}_snid.output'.format(os.path.basename(fname).split(fl_ext)[0])
     if os.path.isfile(output_file):
         os.remove(output_file)
 
@@ -153,7 +154,7 @@ def exec_SNID(fname, z = None, template = 'all', rlap = 'default', z_tol = 0.02,
     if os.path.isfile(output_file):
         return output_file
     else:
-        None
+        return None
 
 def read_output_file(output_file):
     '''
@@ -205,7 +206,6 @@ def read_output_file(output_file):
 
     template_results = np.genfromtxt(output_file, dtype = None, skip_header = rlap_res_start,
                                      max_rows = max_rows_rlap, names = rlap_col_names, encoding = 'utf-8')
-
     return type_results, template_results
 
 def read_lnw(fname):
