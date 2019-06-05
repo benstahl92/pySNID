@@ -100,7 +100,7 @@ def SNID_subtype(fname, z = None, template_type = 'all', rlap = 10, z_tol = 0.02
         # if favored subtype has fraction over 50 percent and is same as subtype of best fitting template return it - otherwise None
         return favored_subtype if ((fav_stp_frac >= 0.5) and (favored_subtype == best_template_type)) else None
 
-def SNID_redshift(fname, template_type = 'all'):
+def SNID_redshift(fname, template_type = 'all', rlap = 'default', z_tol = 0.02):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN redshift and error
     SN redshift is median of redshifts from 'good' template matches
@@ -118,7 +118,7 @@ def SNID_redshift(fname, template_type = 'all'):
     '''
 
     # execute SNID and retrieve output
-    output_file = exec_SNID(fname, template = template_type)
+    output_file = exec_SNID(fname, template = template_type, rlap = rlap, z_tol = z_tol)
 
     # if output_file does not exist return None
     if output_file is None:
@@ -130,12 +130,12 @@ def SNID_redshift(fname, template_type = 'all'):
         type_results, template_results = read_output_file(output_file)
 
         # extract redshifts from 'good' template matches
-        redshifts = template_results[template_results['grade']=='good']['z']
+        redshifts = template_results[template_results['grade'] == 'good']['z']
 
         # return median and std deviation if there is at least one redshift found
         return (np.median(redshifts), np.std(redshifts)) if (len(redshifts) > 0) else (None, None)
 
-def SNID_age(fname, z, z_tol = 0.02, template_type = 'all', relax_age_restr = False):
+def SNID_age(fname, z, template_type = 'all', rlap = 'default', relax_age_restr = False, z_tol = 0.02):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN age and error
     SN age is median of ages from 'good' template matches that have rlap at least 75 pct of maximum rlap
@@ -160,7 +160,7 @@ def SNID_age(fname, z, z_tol = 0.02, template_type = 'all', relax_age_restr = Fa
     '''
 
     # execute SNID and retrieve output
-    output_file = exec_SNID(fname, z = z, template = template_type, z_tol = z_tol)
+    output_file = exec_SNID(fname, z = z, template = template_type, rlap = rlap, z_tol = z_tol)
 
     # if output_file does not exist return None
     if output_file is None:
@@ -184,7 +184,7 @@ def SNID_age(fname, z, z_tol = 0.02, template_type = 'all', relax_age_restr = Fa
         # if age restrictions are not relaxed, return age and age error if age error satisfies below reqs, otherwise return None
         if relax_age_restr is False:
             # return age and error if the error is less than 4d or 20 percent of age (whichever greater)
-            return (age, age_err) if ((age_err < 4) or (age_err < 0.2 * age)) else (None, None)
+            return (age, age_err) if ((age_err < 4) or (age_err < np.abs(0.2 * age))) else (None, None)
 
         # if age restrictions are relaxed, then return age and age error regardless
         else:
@@ -243,7 +243,7 @@ def pySNID(fname, z, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False):
             z_snid, z_snid_error = SNID_redshift(fname, template_type = SN_subtype)
 
             # if snid redshift and subtype found, try to find age
-            if( z_snid is not None) and (z_snid_error is not None):
+            if (z_snid is not None) and (z_snid_error is not None):
 
                 # set redshift
                 if (type(z) == type(0.1)) or (type(z) == type(1)):

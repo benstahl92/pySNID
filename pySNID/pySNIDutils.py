@@ -70,7 +70,7 @@ def _z_arg(z):
 
 def _template_arg(template):
     '''
-    takes preferred template type (e.g. Ia or Ia-norm) to returns SNID formatted string to force only that type
+    takes preferred template type (e.g. Ia or Ia-norm) and returns SNID formatted string to force only that type
     returns empty string if all templates are specified
 
     Parameters
@@ -87,8 +87,27 @@ def _template_arg(template):
     else:
         return 'usetype={}'.format(template)
 
+def _rlap_arg(rlap):
+    '''
+    takes rlap limit and returns SNID formatted string to enforce it
+    return empty string if default is specified
 
-def exec_SNID(fname, z = None, template = 'all', rlap = 10, z_tol = 0.02, print_cmd = False):
+    Parameters
+    ----------
+    rlap : rlap value to set for limit
+
+    Returns
+    -------
+    NID formatted string to enforce rlap limit unless default is requested (then empty string)
+    '''
+
+    if rlap == 'default':
+        return ''
+    else:
+        return 'rlapmin={}'.format(rlap)
+
+
+def exec_SNID(fname, z = None, template = 'all', rlap = 'default', z_tol = 0.02, print_cmd = False):
     '''
     formulates and executes SNID command
 
@@ -113,7 +132,7 @@ def exec_SNID(fname, z = None, template = 'all', rlap = 10, z_tol = 0.02, print_
     # formulate arguments
     forcez_arg = _z_arg(z)
     ztol_arg = 'zfilter={}'.format(z_tol)
-    rlap_arg = 'rlapmin={}'.format(rlap)
+    rlap_arg = _rlap_arg(rlap)
     template_arg = _template_arg(template)
 
     # construct command
