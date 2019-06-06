@@ -4,13 +4,13 @@ from distutils.errors import DistutilsSetupError
 import shutil
 
 class CustomInstallCommand(install):
-    """Customized setuptools install command - checks for SNID installation."""
+    '''Customized setuptools install command -- checks for SNID installation'''
     def run(self):
-        snid_install = shutil.which("snid")
+        snid_install = shutil.which('snid')
         if snid_install is not None:
             install.run(self)
         else:
-            raise DistutilsSetupError("Cannot find SNID, aborting pySNID installation")
+            raise DistutilsSetupError('Cannot find SNID, aborting pySNID installation. Install SNID first.')
 
 setup(name='pySNID',
       version='0.1.dev0',

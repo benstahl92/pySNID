@@ -5,9 +5,6 @@ import numpy as np
 # imports - custom
 from .pySNIDutils import exec_SNID, read_output_file, _snid_check
 
-# check that SNID is properly installed and exit if not
-_snid_check()
-
 def SNID_type(fname, z = None, rlap = 10, z_tol = 0.02):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN type

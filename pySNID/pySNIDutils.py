@@ -1,5 +1,5 @@
 '''
-SNID_utils.py
+pySNIDutils.py
 
 A collection of utility functions for interacting with SNID inputs and outputs
 the casual user will have no need to directly interact with the contents of this file
@@ -10,14 +10,6 @@ import os
 import shlex
 import subprocess
 import numpy as np
-
-def _snid_check():
-    '''checks that SNID is properly installed and raises an import error if not'''
-
-    import shutil
-    s = shutil.which('snid')
-    if (s is None) or (s == ''):
-        raise ImportError("SNID is not installed as expected --- make sure 'snid' invokes it")
 
 def _it_line_locate(fl, sstring):
     '''
