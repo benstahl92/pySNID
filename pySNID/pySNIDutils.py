@@ -60,6 +60,27 @@ def _z_arg(z):
     else:
         return ''
 
+def _z_lim(zmin = None, zmax = None):
+    '''
+    takes minimum and maximum redshift bounds and returns SNID formatted string
+    return empyt string if no use-able (float) bounds are passed
+
+    Parameters
+    ----------
+    zmin, zmax : redshift bounds
+
+    Returns
+    -------
+    SNID formatted argument to set redshift bounds
+    '''
+
+    arg = ''
+    if type(zmin) == type(0.1):
+        arg += 'zmin={}'.format(zmin)
+    if type(zmin) == type(0.1):
+        arg += ' zmax={}'.format(zmax)
+    return arg
+
 def _template_arg(template):
     '''
     takes preferred template type (e.g. Ia or Ia-norm) and returns SNID formatted string to force only that type
@@ -99,7 +120,7 @@ def _rlap_arg(rlap):
         return 'rlapmin={}'.format(rlap)
 
 
-def exec_SNID(fname, z = None, template = 'all', rlap = 'default', z_tol = 0.02, print_cmd = False):
+def exec_SNID(fname, z = None, template = 'all', rlap = 'default', z_tol = 0.02, zmin = None, zmax = None, print_cmd = False):
     '''
     formulates and executes SNID command
 
@@ -124,11 +145,12 @@ def exec_SNID(fname, z = None, template = 'all', rlap = 'default', z_tol = 0.02,
     # formulate arguments
     forcez_arg = _z_arg(z)
     ztol_arg = 'zfilter={}'.format(z_tol)
+    zlim_arg = _z_lim(zmin = zmin, zmax = zmax)
     rlap_arg = _rlap_arg(rlap)
     template_arg = _template_arg(template)
 
     # construct command
-    snid_command = 'snid {} {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, ztol_arg, template_arg, fname)
+    snid_command = 'snid {} {} {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, zlim_arg ztol_arg, template_arg, fname)
 
     # get output file name (made in working directory) and delete file from previous runs
     fl_ext = '.' +  os.path.basename(fname).split('.')[-1]

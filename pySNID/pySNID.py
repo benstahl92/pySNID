@@ -97,7 +97,7 @@ def SNID_subtype(fname, z = None, template_type = 'all', rlap = 10, z_tol = 0.02
         # if favored subtype has fraction over 50 percent and is same as subtype of best fitting template return it - otherwise None
         return favored_subtype if ((fav_stp_frac >= 0.5) and (favored_subtype == best_template_type)) else None
 
-def SNID_redshift(fname, template_type = 'all', rlap = 'default', z_tol = 0.02):
+def SNID_redshift(fname, template_type = 'all', rlap = 'default', z_tol = 0.02, zmin = None, zmax = None):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN redshift and error
     SN redshift is median of redshifts from 'good' template matches
@@ -107,6 +107,7 @@ def SNID_redshift(fname, template_type = 'all', rlap = 'default', z_tol = 0.02):
     ----------
     fname : filename of spectrum file to be analyzed
     template_type : optional, SN type or subtype to force SNID to use with search
+    zmin, zmax : redshift bounds
 
     Returns
     -------
@@ -115,7 +116,7 @@ def SNID_redshift(fname, template_type = 'all', rlap = 'default', z_tol = 0.02):
     '''
 
     # execute SNID and retrieve output
-    output_file = exec_SNID(fname, template = template_type, rlap = rlap, z_tol = z_tol)
+    output_file = exec_SNID(fname, template = template_type, rlap = rlap, z_tol = z_tol, zmin = zmin, zmax = zmax)
 
     # if output_file does not exist return None
     if output_file is None:
@@ -187,7 +188,7 @@ def SNID_age(fname, z, template_type = 'all', rlap = 'default', relax_age_restr 
         else:
             return (age, age_err)
 
-def pySNID(fname, z, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False):
+def pySNID(fname, z, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False, zd_zmin = 0.0, zd_zmax = 0.5):
     '''
     runs the SuperNova IDentification code (SNID) [Blondin and Tonry 2007] with the updated 
     templates and prescription presented in BSNIP I [Silverman 2012] and used by Stahl et al. 2019
@@ -202,6 +203,7 @@ def pySNID(fname, z, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False):
     z_tol : allowable redshift tolerance (SNID default is 0.02) - not typically changed
     relax_age_restr : bool, optional
                       selects whether to enforce age restrictions - should be False
+    zd_zmin, zd_zmax : bounds to use when determining redshift
 
     Returns
     -------
