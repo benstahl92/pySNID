@@ -150,7 +150,7 @@ def exec_SNID(fname, z = None, template = 'all', rlap = 'default', z_tol = 0.02,
     template_arg = _template_arg(template)
 
     # construct command
-    snid_command = 'snid {} {} {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, zlim_arg ztol_arg, template_arg, fname)
+    snid_command = 'snid {} {} {} {} {} plot=0 inter=0 verbose=0 {}'.format(rlap_arg, forcez_arg, zlim_arg, ztol_arg, template_arg, fname)
 
     # get output file name (made in working directory) and delete file from previous runs
     fl_ext = '.' +  os.path.basename(fname).split('.')[-1]
