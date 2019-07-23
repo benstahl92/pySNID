@@ -239,7 +239,7 @@ def pySNID(fname, z, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False, zd_
 
         # if subtype found (then guaranteed that type is found), try to find redshift
         if SN_subtype is not None:
-            z_snid, z_snid_error = SNID_redshift(fname, template_type = SN_subtype)
+            z_snid, z_snid_error = SNID_redshift(fname, template_type = SN_subtype, zmin = zd_zmin, zmax = zd_zmax)
 
             # if snid redshift and subtype found, try to find age
             if (z_snid is not None) and (z_snid_error is not None):
@@ -254,7 +254,7 @@ def pySNID(fname, z, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False, zd_
 
         # if subtype not found try for redshifts
         if SN_subtype is None:
-            z_snid, z_snid_error = SNID_redshift(fname, template_type = SN_type)
+            z_snid, z_snid_error = SNID_redshift(fname, template_type = SN_type, zmin = zd_zmin, zmax = zd_zmax)
 
     # return calculated quantities
     return SN_type, best_templ, good_num, SN_subtype, z_snid, z_snid_error, age, age_error
