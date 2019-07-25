@@ -5,7 +5,7 @@ import numpy as np
 # imports - custom
 from .pySNIDutils import exec_SNID, read_output_file
 
-def SNID_type(fname, z = None, rlap = 10, z_tol = 0.02):
+def SNID_type(fname, z = None, rlap = 10, z_tol = 0.02, zmin = None, zmax = None):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN type
     SN type is determined if type of best matching ('good') template is same as type with
@@ -24,7 +24,7 @@ def SNID_type(fname, z = None, rlap = 10, z_tol = 0.02):
     '''
 
     # execute SNID and retrieve output
-    output_file = exec_SNID(fname, z = z, rlap = rlap, z_tol = z_tol)
+    output_file = exec_SNID(fname, z = z, rlap = rlap, z_tol = z_tol, zmin = zmin, zmax = zmax)
 
     # if output_file does not exist return None
     if output_file is None:
@@ -54,7 +54,7 @@ def SNID_type(fname, z = None, rlap = 10, z_tol = 0.02):
         # if favored type has fraction over 50 percent and is same as type of best fitting template return it (and info) - otherwise None
         return (favored_type, best_template, fav_tp_num) if ((fav_tp_frac >= 0.5) and (favored_type == best_template_type)) else (None, None, None)
 
-def SNID_subtype(fname, z = None, template_type = 'all', rlap = 10, z_tol = 0.02):
+def SNID_subtype(fname, z = None, template_type = 'all', rlap = 10, z_tol = 0.02, zmin = None, zmax = None):
     '''
     runs SNID on spectrum with appropriate args, reads SNID output file, determines SN subtype
     SN subtype is determined if subtype of best matching ('good') template is same as subtype with
@@ -74,7 +74,7 @@ def SNID_subtype(fname, z = None, template_type = 'all', rlap = 10, z_tol = 0.02
     '''
 
     # execute SNID and retrieve output
-    output_file = exec_SNID(fname, z = z, template = template_type, rlap = rlap, z_tol = z_tol)
+    output_file = exec_SNID(fname, z = z, template = template_type, rlap = rlap, z_tol = z_tol, zmin = zmin, zmax = zmax)
 
     # if output_file does not exist return None
     if output_file is None:
@@ -223,19 +223,19 @@ def pySNID(fname, z, rlaps = (10, 5), z_tol = 0.02, relax_age_restr = False, zd_
     SN_type, best_templ, good_num, SN_subtype, z_snid, z_snid_error, age, age_error = None, None, None, None, None, None, None, None
 
     # run SNID_type with higher rlap value
-    SN_type, best_templ, good_num = SNID_type(fname, z, rlap = rlaps[0], z_tol = z_tol)
+    SN_type, best_templ, good_num = SNID_type(fname, z, rlap = rlaps[0], z_tol = z_tol, zmin = zd_zmin, zmax = zd_zmax)
         
     # if type isn't found, try again with lower rlap value
     if SN_type is None:
-        SN_type, best_templ, good_num = SNID_type(fname, z, rlap = rlaps[1], z_tol = z_tol)
+        SN_type, best_templ, good_num = SNID_type(fname, z, rlap = rlaps[1], z_tol = z_tol, zmin = zd_zmin, zmax = zd_zmax)
     
     # if type found, try to find subtype (with higher rlap first)
     if SN_type is not None:
-        SN_subtype = SNID_subtype(fname, z, template_type = SN_type, rlap = rlaps[0], z_tol = z_tol)
+        SN_subtype = SNID_subtype(fname, z, template_type = SN_type, rlap = rlaps[0], z_tol = z_tol, zmin = zd_zmin, zmax = zd_zmax)
 
         # if subtype isn't found, try again with lower rlap value
         if SN_subtype is None:
-            SN_subtype = SNID_subtype(fname, z, template_type = SN_type, rlap = rlaps[1], z_tol = z_tol)
+            SN_subtype = SNID_subtype(fname, z, template_type = SN_type, rlap = rlaps[1], z_tol = z_tol, zmin = zd_zmin, zmax = zd_zmax)
 
         # if subtype found (then guaranteed that type is found), try to find redshift
         if SN_subtype is not None:
